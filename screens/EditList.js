@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity} from 'react-native
 import Colors from '../constants/Colors'
 import { CommonActions } from '@react-navigation/native'
 import ColorSelector from '../components/ColorSelector'
+import Button from '../components/Button'
 
 const colorList = [
     "blue",
@@ -54,8 +55,8 @@ const EditList = ({navigation, route}) => {
                         colorOptions={colorList}
                     />
             </View>
-            <TouchableOpacity 
-                style={styles.saveButton} 
+            <Button 
+                text='Save'
                 onPress={()=>{
                     if(title.length > 1){
                         route.params.saveChanges({title, color});
@@ -63,9 +64,7 @@ const EditList = ({navigation, route}) => {
                     } else {
                         setValidity(false);
                     }
-                }}> 
-            <Text style={{color:'white', fontSize: 24, fontWeight: 'bold'}}>Save</Text>
-            </TouchableOpacity>
+                }} />
         </View>
     )
 }

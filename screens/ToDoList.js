@@ -17,7 +17,7 @@ const renderAddListIcon = (addItem) => {
 const ToDoList = ({navigation}) => {
 
 
-    let [toDoItems, setToDoItems] = useState([{text: 'hello', isChecked: false, }])
+    let [toDoItems, setToDoItems] = useState([])
 
 
     const addItemToLists = (item) => {
