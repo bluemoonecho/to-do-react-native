@@ -1,23 +1,60 @@
 import React, {useState} from 'react'
 import { Text, View, StyleSheet, TouchableOpacity, TextInput} from 'react-native'
 import Colors from '../constants/Colors'
-import {Ionicons} from '@expo/vector-icons'
 import CheckBox from './CheckBox'
 
 
-const ToDoItem = ({text, isChecked, onChecked}) => {
+const EditableText = ({isChecked, onChangeText, text, isNewItem}) => {
     
+    const[isEditMode, setEditMode] = useState(isNewItem);
+
+    return (
+        <TouchableOpacity 
+        style={{flex: 1}} 
+        onPress={()=>{!isChecked && setEditMode(true)}}>
+        {isEditMode ? 
+        <TextInput
+            underlineColorAndroid={'transparent'}
+            selectionColor={'transparent'}
+            autoFocus={true}
+            value={text}
+            onChangeText={onChangeText}
+            placeholder={'Add new item'}
+            onSubmitEditing={()=>{}}
+            maxLength={30}
+            style={[styles.input, {outline: 'none'}]}
+            onBlur={()=> setEditMode(false)}
+        />
+        : 
+        <Text 
+        style={[styles.text, 
+        { color : isChecked ? Colors.lightGray : Colors.black,
+            textDecoration: isChecked ? 'line-through' : 'none'}]}>
+        {text}</Text>
+        }
+    </TouchableOpacity>
+    )
+    
+}
+
+
+
+const ToDoItem = ({text, isChecked, onChecked, onChangeText, onDelete, isNewItem}) => {
+
     return (
         <View style={styles.container}> 
             <View style={{flexDirection:'row', flex: 1}}>
                 <CheckBox isChecked={isChecked} onChecked={onChecked}/>
-                <TouchableOpacity onPress={()=>{}}>
-                    <Text>{text}</Text>
-                </TouchableOpacity>
-                
+                <EditableText 
+                    isChecked={isChecked} 
+                    onChangeText={onChangeText}
+                    text={text}
+                    isNewItem={isNewItem}
+                    />               
             </View>
-            {/* Remove */}
-            <Text>{text}</Text> 
+            <TouchableOpacity onPress={onDelete}>
+                <Text style={styles.icon, {color: Colors.red}}>X</Text>
+            </TouchableOpacity>
         </View>
     )
 }
@@ -50,5 +87,6 @@ const styles = StyleSheet.create({
     text: {
         padding: 3,
         fontSize: 16,
+        color: Colors.black
     },
 });

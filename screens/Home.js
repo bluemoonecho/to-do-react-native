@@ -4,7 +4,7 @@ import Colors from '../constants/Colors'
 import {Ionicons} from '@expo/vector-icons'
 
 
-const ListButton = ({title, color, onPress, onDelete}) => {
+const ListButton = ({title, color, onPress, onDelete, onOptions}) => {
 
     return (
         <View style={styles.container}>
@@ -15,11 +15,17 @@ const ListButton = ({title, color, onPress, onDelete}) => {
                     <Text style={styles.itemTitle}>{title}</Text>
                 </View>
                 <View style={{flexDirection:'row'}}> 
-                    <TouchableOpacity onPress={()=>{}}>
-                        <Ionicons name='options-outline' size={24} color='white' />
+                    <TouchableOpacity onPress={onOptions}>
+                        <Ionicons 
+                            name='options-outline' 
+                            size={24} 
+                            color='white' />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={onDelete}>
-                        <Ionicons name='trash-outline' size={24} color='white' />
+                        <Ionicons 
+                            name='trash-outline' 
+                            size={24} 
+                            color='white' />
                     </TouchableOpacity>
                 </View>
             </TouchableOpacity>
@@ -27,9 +33,9 @@ const ListButton = ({title, color, onPress, onDelete}) => {
     )
 }
 
-const renderAddListIcon = (addItem) => {
+const renderAddListIcon = (navigation, addItemToLists) => {
     return (
-        <TouchableOpacity onPress={()=> addItem({title: 'Title', color : Colors.orange})}> 
+        <TouchableOpacity onPress={() => navigation.navigate('Edit', {saveChanges:  addItemToLists})}> 
             <Text style={styles.icon}>+</Text>
         </TouchableOpacity>
     )
@@ -49,14 +55,20 @@ const Home = ({navigation}) => {
         lists.push(item)
         setLists([...lists])
     }
+
     const removeItemFromLists = (index) => {
         lists.splice(index,1);
         setLists([...lists])
     }
 
+    const updateItemFromLists = (index, item) => {
+        lists[index] = item;
+        setLists([...lists])
+    }
+
     useLayoutEffect(()=>{
         navigation.setOptions({ 
-            headerRight: () => renderAddListIcon(addItemToLists)
+            headerRight: () => renderAddListIcon(navigation, addItemToLists)
         })
     })
 
@@ -73,6 +85,11 @@ const Home = ({navigation}) => {
                                 onPress={()=>{navigation.navigate('To Do List', {title, color})}}
                                 navigation={navigation}
                                 onDelete={()=> removeItemFromLists(index)}
+                                onOptions={()=>{
+                                    navigation.navigate
+                                    ('Edit', 
+                                    {title, color, 
+                                    saveChanges: (item) => updateItemFromLists(index, item)})}}
                                 />
                         )
                     }}
