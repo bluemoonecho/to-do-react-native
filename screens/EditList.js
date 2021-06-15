@@ -2,6 +2,20 @@ import React, {useState,} from 'react'
 import { StyleSheet, Text, View, TextInput, TouchableOpacity} from 'react-native'
 import Colors from '../constants/Colors'
 import { CommonActions } from '@react-navigation/native'
+import ColorSelector from '../components/ColorSelector'
+
+const colorList = [
+    "blue",
+    "teal",
+    "green",
+    "olive",
+    "yellow",
+    "orange",
+    "red",
+    "pink",
+    "purple",
+    "blueGray",
+];
 
 
 const EditList = ({navigation, route}) => {
@@ -28,7 +42,17 @@ const EditList = ({navigation, route}) => {
                     }}
                     placeholder={'New List Name'}
                     maxLength={30}
-                    style={[styles.input, {outline: 'none'}]}                />
+                    style={[styles.input, {outline: 'none'}]} 
+                />
+                <Text style={styles.label}>Choose Color</Text>
+                    <ColorSelector 
+                        onSelect={(color)=>{
+                            setColor(color)
+                            navigation.dispatch(CommonActions.setParams({color}))
+                        }}
+                        selectedColor={color}
+                        colorOptions={colorList}
+                    />
             </View>
             <TouchableOpacity 
                 style={styles.saveButton} 
@@ -77,5 +101,6 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 16,
         marginBottom: 8,
+        marginTop: 15,
     },
 });
