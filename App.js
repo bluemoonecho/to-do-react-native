@@ -8,6 +8,7 @@ import ToDoList from './screens/ToDoList'
 import EditList from './screens/EditList'
 import Colors from './constants/Colors';
 import Login from './screens/Login'
+import Settings from './screens/Settings'
 import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
@@ -27,6 +28,8 @@ const Screens = () =>{
   return(
     <Stack.Navigator>  
     <Stack.Screen name='To-Do' component={Home}/>
+    <Stack.Screen name='Settings' component={Settings}/>
+
     <Stack.Screen 
     name='To Do List' 
     component={ToDoList}
