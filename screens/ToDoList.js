@@ -3,34 +3,55 @@ import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native
 import Colors from '../constants/Colors'
 import {Ionicons} from '@expo/vector-icons'
 import ToDoItem from '../components/ToDoItem'
+import { onSnapshot, addDoc, removeDoc, updateDoc } from '../services/collections'
+import firebase from "firebase/app";
+import { useEffect } from 'react/cjs/react.development'
 
 
 
 const renderAddListIcon = (addItem) => {
     return (
-        <TouchableOpacity onPress={()=> addItem({text: '', isChecked : false, isNewItem: true})}> 
+        <TouchableOpacity onPress={()=> addItem()}> 
             <Text style={styles.icon}>+</Text>
         </TouchableOpacity>
     )
 }
 
-const ToDoList = ({navigation}) => {
-
+const ToDoList = ({navigation, route}) => {
 
     let [toDoItems, setToDoItems] = useState([])
+    const [newItem, setNewItem] = useState();
+    const toDoItemsRef = firebase.firestore()
+    .collection('users')
+    .doc(firebase.auth().currentUser.uid)
+    .collection('lists')
+    .doc(route.params.listId)
+    .collection('todoItem')
+
+    useEffect(()=>{
+        onSnapshot(toDoItemsRef, 
+            (newToDoItems) => {
+            setToDoItems(newToDoItems)
+        }, {
+            sort: (a,b) => {
+                if(a.isChecked && !b.isChecked){
+                    return 1
+                } if(b.isChecked && !a.isChecked){
+                    return -1
+                }
+                return 0
+            }
+        })
+    }, [])
 
 
-    const addItemToLists = (item) => {
-        toDoItems.push(item);
-        setToDoItems([...toDoItems])
+    const addItemToLists = () => {
+        // toDoItems.push(item);
+        // setToDoItems([...toDoItems])
+        setNewItem({text:'', isChecked: false, newToDo: true })
     }
     const removeItemFromLists = (index) => {
         toDoItems.splice(index,1);
-        setToDoItems([...toDoItems])
-    }
-
-    const updateItem = (index, item) => {
-        toDoItems[index] = item;
         setToDoItems([...toDoItems])
     }
 
@@ -40,31 +61,60 @@ const ToDoList = ({navigation}) => {
         })
     })
 
+    if(newItem) {
+        toDoItems = [newItem, ...toDoItems];
+    }
+    
     return (
         <View style={styles.container}>
             <FlatList 
                 data={toDoItems}
-                renderItem={({item: {text, isChecked, isNewItem}, index}) => {
-                    return <ToDoItem 
+                renderItem={({item: {id, text, isChecked, ...params}, index}) => {
+                    return (
+                        <ToDoItem 
+                            {...params}
                             text={text} 
                             isChecked={isChecked} 
-                            isNewItem={isNewItem}
                             onChecked={()=> {
-                                const toDoItem = toDoItems[index]
-                                toDoItem.isChecked = !isChecked
-                                updateItem(index, toDoItem)
+                                let data= {text, isChecked: !isChecked};
+                                if(id) {
+                                    data.id = id;
+                                }
+                                addDoc(toDoItemsRef, data);
                             }}
                             onChangeText={(newText) => {
-                                const toDoItem = toDoItems[index]
-                                toDoItem.text = newText
-                                updateItem(index, toDoItem)
+                                if(params.new){
+                                    setNewItem({ 
+                                        text: newText,
+                                        isChecked,
+                                        new: params.new
+                                        });
+                                } else {
+                                    toDoItems[index].text = newText;
+                                    setToDoItems([...toDoItems])
+                                }
                             }}
                             onDelete={()=>{
-                                removeItemFromLists(index)
+                                params.newToDo ? setNewItem(null) : removeItemFromLists(index);
+                                id && removeDoc(toDoItemsRef, id)
                             }}
-                            />;
+                            onBlur={()=>{
+                                if(text.length > 1){
+                                    let data = { text, isChecked}
+                                    if(id){
+                                        data.id = id
+                                    }
+                                    addDoc(toDoItemsRef, data);
+                                    params.newToDo && setNewItem(null)
+                                } else {
+                                    params.newToDo
+                                    ? setNewItem(null) 
+                                    : removeItemFromLists(index)
+                                }
+                            }}
+                            />
+                            )
                 }}
-
             />
         </View>
     )

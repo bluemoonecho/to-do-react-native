@@ -4,9 +4,9 @@ import Colors from '../constants/Colors'
 import CheckBox from './CheckBox'
 
 
-const EditableText = ({isChecked, onChangeText, text, isNewItem}) => {
+const EditableText = ({isChecked, onChangeText, text, ...props}) => {
     
-    const[isEditMode, setEditMode] = useState(isNewItem);
+    const[isEditMode, setEditMode] = useState(props.newToDo);
 
     return (
         <TouchableOpacity 
@@ -23,7 +23,10 @@ const EditableText = ({isChecked, onChangeText, text, isNewItem}) => {
             onSubmitEditing={()=>{}}
             maxLength={30}
             style={[styles.input, {outline: 'none'}]}
-            onBlur={()=> setEditMode(false)}
+            onBlur={()=> {
+                props.onBlur && props.onBlur();
+                setEditMode(false)}
+            }
         />
         : 
         <Text 
@@ -39,7 +42,7 @@ const EditableText = ({isChecked, onChangeText, text, isNewItem}) => {
 
 
 
-const ToDoItem = ({text, isChecked, onChecked, onChangeText, onDelete, isNewItem}) => {
+const ToDoItem = ({text, isChecked, onChecked, onChangeText, onDelete, ...props}) => {
 
     return (
         <View style={styles.container}> 
@@ -49,7 +52,7 @@ const ToDoItem = ({text, isChecked, onChecked, onChangeText, onDelete, isNewItem
                     isChecked={isChecked} 
                     onChangeText={onChangeText}
                     text={text}
-                    isNewItem={isNewItem}
+                    {...props}
                     />               
             </View>
             <TouchableOpacity onPress={onDelete}>

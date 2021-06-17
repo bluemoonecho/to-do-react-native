@@ -77,7 +77,6 @@ const Home = ({navigation}) => {
 
     const addItemToLists = ({title, color}) => {
         const index = lists.length > 1 ? lists[lists.length -1].index + 1 : 0
-        // setLists([...lists])
         addDoc(listsRef, {title, color, index})
     }
 
@@ -105,7 +104,7 @@ const Home = ({navigation}) => {
                             <ListButton 
                                 title={title} 
                                 color={color} 
-                                onPress={()=>{navigation.navigate('To Do List', {title, color})}}
+                                onPress={()=>{navigation.navigate('To Do List', {title, color, listId : id})}}
                                 navigation={navigation}
                                 onDelete={()=> removeItemFromLists(id)}
                                 onOptions={()=>{
