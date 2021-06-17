@@ -35,9 +35,14 @@ const ListButton = ({title, color, onPress, onDelete, onOptions}) => {
 
 const renderAddListIcon = (navigation, addItemToLists) => {
     return (
+        <View>
+        <View style={styles.btn}>
+
+        </View>
         <TouchableOpacity onPress={() => navigation.navigate('Edit', {saveChanges:  addItemToLists})}> 
             <Text style={styles.icon}>+</Text>
         </TouchableOpacity>
+        </View>
     )
 }
 

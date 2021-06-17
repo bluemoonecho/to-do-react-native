@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React, {useState,} from 'react';
+import React, {useState, useEffect} from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer} from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
@@ -9,6 +9,8 @@ import EditList from './screens/EditList'
 import Colors from './constants/Colors';
 import Login from './screens/Login'
 import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/firestore";
 
 const Stack = createStackNavigator();
 const AuthStack = createStackNavigator();
@@ -57,6 +59,25 @@ const Screens = () =>{
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() =>{
+    if(firebase.auth().currentUser){
+      setIsAuthenticated(true);
+    }
+    firebase.auth().onAuthStateChanged(user => {
+      console.log('check auth state...')
+      if (user ){
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+    });
+  },[])
+
+
+
+  // test@test.com
+  //tesT123%
 
   return (
     <NavigationContainer>

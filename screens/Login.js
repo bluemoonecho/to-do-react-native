@@ -1,76 +1,98 @@
-import React, {useState} from 'react'
-import { Text, View, StyleSheet, TouchableOpacity, TextInput} from 'react-native'
-import Colors from '../constants/Colors'
-import Button from '../components/Button'
-import LabelInput from '../components/LabelInput'
-import {Ionicons} from '@expo/vector-icons'
-import validator from 'validator'
+import React, { useState } from "react";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import Button from "../components/Button";
+import LabeledInput from "../components/LabelInput";
+import Colors from "../constants/Colors";
+import validator from "validator";
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/firestore";
 
-const validateFields = (email, passwords) => {
+// const db = app.firestore();
+// const auth = firebase.auth();
+
+const validateFields = (email, password) => {
     const isValid = {
-        email: validador.isEmail(email),
-        password: validador.isStrongPassword(password, {
-            minLength: 4,
-            // minLowerCase: 1,
+        email: validator.isEmail(email),
+        password: validator.isStrongPassword(password, {
+            minLength: 8,
+            // minLowercase: 1,
             // minUppercase: 1,
             // minNumbers: 1,
-            // minSymbols: 1
-        })
-    }
-}
+            // minSymbols: 1,
+        }),
+    };
 
+    return isValid;
+};
+
+const login = (email, password) => {
+    firebase.auth()
+        .signInWithEmailAndPassword(email, password)
+        .then(() => {
+            console.log("Logged in!");
+        });
+};
+
+const createAccount = (email, password) => {
+    firebase.auth()
+        .createUserWithEmailAndPassword(email, password)
+        .then(({ user }) => {
+            console.log("Creating user...");
+            firebase.firestore().collection("users").doc(user.uid).set({});
+        });
+};
 
 const Login = () => {
-    const [isCreateMode, setCreateMode] = useState(false)
+    const [isCreateMode, setCreateMode] = useState(false);
     const [emailField, setEmailField] = useState({
-        text: '',
-        errorMessage:''
-    })
+        text: "",
+        errorMessage: "",
+    });
     const [passwordField, setPasswordField] = useState({
-        text: '',
-        errorMessage:''
-    })
+        text: "",
+        errorMessage: "",
+    });
     const [passwordReentryField, setPasswordReentryField] = useState({
-        text: '',
-        errorMessage:''
-    })
+        text: "",
+        errorMessage: "",
+    });
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>To-Dos</Text>
-            <View style={{flex: 1}}> 
-                <LabelInput 
-                    label='Email' 
+            <Text style={styles.header}>🔥 ToDo</Text>
+            <View style={{ flex: 1 }}>
+                <LabeledInput
+                    label="Email"
                     text={emailField.text}
+                    onChangeText={(text) => {
+                        setEmailField({ text });
+                    }}
                     errorMessage={emailField.errorMessage}
-                    onChangeText={(text)=>{
-                        setEmailField({text})
-                    }}
                     labelStyle={styles.label}
-                    autoCompleteType={'email'}
-                    />
-                <LabelInput 
-                    label='Password' 
+                    autoCompleteType="email"
+                />
+                <LabeledInput
+                    label="Password"
                     text={passwordField.text}
+                    onChangeText={(text) => {
+                        setPasswordField({ text });
+                    }}
+                    secureTextEntry={true}
                     errorMessage={passwordField.errorMessage}
-                    onChangeText={(text)=>{
-                        setPasswordField({text})
-                    }}
                     labelStyle={styles.label}
-                    autoCompleteType={'password'}
-                    secureTextEntry={true}
-                    />
+                    autoCompleteType="password"
+                />
                 {isCreateMode && (
-                <LabelInput 
-                    label='Re-enter Password' 
-                    text={passwordReentryField.text}
-                    errorMessage={passwordReentryField.errorMessage}
-                    onChangeText={(text)=>{
-                        setPasswordReentryField({text})
-                    }}
-                    labelStyle={styles.label}
-                    secureTextEntry={true}
-                    // autoCompleteType={'password'}
+                    <LabeledInput
+                        label="Re-enter Password"
+                        text={passwordReentryField.text}
+                        onChangeText={(text) => {
+                            setPasswordReentryField({ text });
+                        }}
+                        secureTextEntry={true}
+                        errorMessage={passwordReentryField.errorMessage}
+                        labelStyle={styles.label}
                     />
                 )}
                 <TouchableOpacity
@@ -91,40 +113,51 @@ const Login = () => {
                             : "Create new account"}
                     </Text>
                 </TouchableOpacity>
-
             </View>
-            <Button 
-                text={isCreateMode ? 'Create Account' : 'Login'}
-                onPress={()=>{
+
+            <Button
+                onPress={() => {
                     const isValid = validateFields(
-                        emailField.text, passwordField.text);
+                        emailField.text,
+                        passwordField.text
+                    );
                     let isAllValid = true;
-                    if(!isValid.email){
-                        emailField.errorMessage = 'Please enter a valid email'
-                        setEmailField({...emailField})
-                        isAllValid = false
+                    if (!isValid.email) {
+                        emailField.errorMessage = "Please enter a valid email";
+                        setEmailField({ ...emailField });
+                        isAllValid = false;
                     }
-                    if(!isValid.password) {
-                        passwordField.errorMessage = 'Please must be at leas 4 characters long'
-                        setPasswordField({...passwordField})
-                        isAllValid = false
+
+                    if (!isValid.password) {
+                        passwordField.errorMessage =
+                            "Password must be at least 8 long w/numbers, uppercase, lowercase, and symbol characters";
+                        setPasswordField({ ...passwordField });
+                        isAllValid = false;
                     }
-                    if(isCreateMode && passwordReentryField.text != passwordField.text){
-                        passwordField.errorMessage = 'Passwords do not match'
-                        setPasswordField({...passwordField})
-                        isAllValid = false
+
+                    if (
+                        isCreateMode &&
+                        passwordReentryField.text != passwordField.text
+                    ) {
+                        passwordReentryField.errorMessage =
+                            "Passwords do not match";
+                        setPasswordReentryField({ ...passwordReentryField });
+                        isAllValid = false;
                     }
-                    if(isAllValid){
-                        isCreateMode ? createAccount () : login()
+
+                    if (isAllValid) {
+                        isCreateMode
+                            ? createAccount(emailField.text, passwordField.text)
+                            : login(emailField.text, passwordField.text);
                     }
                 }}
-                buttonStyle={{backgroundColor: Colors.blue}}
+                buttonStyle={{ backgroundColor: Colors.red }}
+                text={isCreateMode ? "Create Account" : "Login"}
             />
         </View>
-    )
-}
-
-export default Login
+    );
+};
+export default Login; 
 
 const styles = StyleSheet.create({
     container: {
@@ -134,5 +167,5 @@ const styles = StyleSheet.create({
         alignItems: "stretch",
     },
     label: { fontSize: 16, fontWeight: "bold", color: Colors.black },
-    header: { fontSize: 50, color: Colors.blue, alignSelf: "center" },
+    header: { fontSize: 72, color: Colors.red, alignSelf: "center" },
 });
